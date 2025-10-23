@@ -1,0 +1,21 @@
+MORPHOLOGICAL OPERATIONS
+
+clc; clear; close all;
+img = imread("/MATLAB Drive/download (19).jpg");
+if size(img,3)==3, gray=rgb2gray(img); 
+else, gray=img;
+end 
+se=strel('line',11,90);
+figure;  
+subplot(3,4,1), imshow(img), title('Original');
+subplot(3,4,2), imshow(gray), title('Gray');
+subplot(3,4,3), imshow(imerode(gray,se)), title('Erosion');
+subplot(3,4,4), imshow(imdilate(gray,se)), title('Dilation');
+subplot(3,4,5), imshow(imopen(gray,se)), title('Opening');
+subplot(3,4,6), imshow(imclose(gray,se)), title('Closing');
+subplot(3,4,7), imshow(imsubtract(imdilate(gray,se), imerode(gray,se))), title('Gradient');
+subplot(3,4,8), imshow(imtophat(gray,se)), title('Top Hat');
+subplot(3,4,9), imshow(imbothat(gray,se)), title('Black Hat');
+subplot(3,4,10), imshow(imdilate(gray,strel('disk',6))), title('Elliptical');
+subplot(3,4,11), imshow(imdilate(gray,strel('rectangle',[11 11]))), title('Rectangular');
+subplot(3,4,12), imshow(imdilate(gray,strel('arbitrary',[0 1 0;1 1 1;0 1 0]))), title('Cross');
