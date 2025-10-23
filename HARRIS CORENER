@@ -1,0 +1,10 @@
+filename = "/MATLAB Drive/2i3TK603pRdrEiN7mnoSa6EurvY-mobile.jpg";
+img = imread(filename);
+gray = double(rgb2gray(img));
+cStrength = imdilate(cornermetric(gray, 'Harris'), strel('disk',1));
+mask = cStrength > 0.01 * max(cStrength(:));
+cornerImg = img;
+cornerImg(repmat(mask, [1,1,3])) = 0;
+cornerImg(:,:,1) = cornerImg(:,:,1) + uint8(255 * mask);
+figure, imshow(img), title('Original Image');
+figure, imshow(cornerImg), title('Harris Corners')
