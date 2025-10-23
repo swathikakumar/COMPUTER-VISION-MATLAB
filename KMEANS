@@ -1,0 +1,24 @@
+function kmeans_visualization_ultrashort()
+clc;
+k=5;
+s=512; 
+col=hsv2rgb([linspace(0,1,k)',ones(k,2)]);
+while true
+    [p,~]=deal([],[]);
+    for i=1:k, c=randi([s*.25 s*.75],1,2); 
+        sd=randi([10 40]); 
+        n=floor(s/k*5); 
+        pts=randn(n,2)*sd+c; p=[p;pts];
+    end
+    [L,~]=kmeans(p,k,'MaxIter',100);
+    clf; hold on; axis([0 s 0 s]); 
+    axis ij off; set(gcf,'Color','k');
+    for i=1:k, 
+        scatter(p(L==i,1),p(L==i,2),5,repmat(col(i,:),sum(L==i),1),'filled'); 
+    end
+    title('K-Means Clustering','Color','w'); 
+    drawnow;
+    if waitforbuttonpress && double(get(gcf,'CurrentCharacter'))==27, break; 
+    end
+end
+end
