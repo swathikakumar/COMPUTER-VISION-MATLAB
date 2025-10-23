@@ -1,0 +1,22 @@
+clc; clear; close all;
+img=imread("/MATLAB Drive/images (13).jpg");
+if size(img,3)==3
+    img=rgb2gray(img); 
+end
+resized=imresize(img,0.5);
+fprintf('Resized: %dx%d\n', size(resized,1), size(resized,2));
+
+eq=histeq(resized);
+imwrite([resized eq],'Histo1_res.png');
+
+[h,~]=imhist(resized); 
+cdf=cumsum(h); cdf=cdf*max(h)/max(cdf);
+figure; yyaxis left, bar(h,'r'); ylabel('Histogram');
+yyaxis right, plot(cdf,'b','LineWidth',1.5); ylabel('CDF');
+xlabel('Intensity'); legend('Histogram','CDF'); title('Histogram & CDF');
+saveas(gcf,'histo2_cdf.png');
+
+figure;
+subplot(1,2,1), imshow(imread('Histo1_res.png')), title('Original & Equalized');
+subplot(1,2,2), imshow(imread('histo2_cdf.png')), title('CDF & Histogram');
+saveas(gcf,'histogram_result3.png');
