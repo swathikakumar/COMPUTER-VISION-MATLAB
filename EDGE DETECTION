@@ -1,0 +1,12 @@
+clc; clear; close all;
+img = imread("/MATLAB Drive/elep.jpg");
+if size(img,3)==3, g=rgb2gray(img);
+else, g=img;
+end
+g = im2double(g); 
+figure;
+t={'Canny','Sobel','Prewitt','Roberts','LoG','Zerocross'};
+m={'canny','sobel','prewitt','roberts','log','zerocross'};
+subplot(2,4,1), imshow(img), title('Original');
+subplot(2,4,2), imshow(g), title('Grayscale');
+for i=1:6, subplot(2,4,i+2), imshow(edge(g,m{i})), title([t{i} ' Edge']); end
