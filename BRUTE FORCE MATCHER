@@ -1,0 +1,71 @@
+NORMAL MATLAB
+
+img1 = rgb2gray(imread("C:\Users\Swathika\Downloads\heid22.jpg"));
+img2 = rgb2gray(imread("C:\Users\Swathika\Downloads\heidi 2.jpg"));
+disp(['MATLAB Version: ', version]);
+pts1 = detectSIFTFeatures(img1);
+pts2 = detectSIFTFeatures(img2);
+[features1, validPts1] = extractFeatures(img1, pts1);
+[features2, validPts2] = extractFeatures(img2, pts2);
+indexPairs = matchFeatures(features1, features2, 'MatchThreshold',100,'MaxRatio',0.7);
+matchedPts1 = validPts1(indexPairs(:,1)); 
+matchedPts2 = validPts2(indexPairs(:,2));
+figure; 
+showMatchedFeatures(img1, img2, matchedPts1, matchedPts2, 'montage');
+title('SIFT Feature Matching with Lowe''s Ratio Test');
+
+
+ONLINE MATLAB CODE
+
+% ---- Read and convert images to grayscale ----
+img1 = rgb2gray(imread('/MATLAB Drive/download (15).jpg'));
+img2 = rgb2gray(imread('/MATLAB Drive/heid22.jpg'));
+
+% ---- Detect corners (no toolbox) ----
+corners1 = corner(img1, 150); % top 150 corners
+corners2 = corner(img2, 150);
+
+% ---- Extract small patches for brute-force matching ----
+patchSize = 21; 
+halfSize = floor(patchSize/2);
+
+features1 = extractCornerPatches(img1, corners1, halfSize);
+features2 = extractCornerPatches(img2, corners2, halfSize);
+
+% ---- Match features (nearest neighbor) ----
+indexPairs = knnsearch(features2, features1);
+
+% ---- Visualization WITHOUT showMatchedFeatures ----
+figure;
+imshowpair(img1, img2, 'montage');
+hold on;
+
+% Shift x-coordinates of second image for plotting
+offset = size(img1,2);
+
+for i = 1:size(corners1,1)
+    pt1 = corners1(i,:);
+    pt2 = corners2(indexPairs(i),:);
+    pt2(1) = pt2(1) + offset; % shift right
+    
+    plot(pt1(1), pt1(2), 'ro');
+    plot(pt2(1), pt2(2), 'go');
+    line([pt1(1) pt2(1)], [pt1(2) pt2(2)], 'Color','y');
+end
+
+title('Brute-Force Corner Matching (No Toolbox)');
+
+% ---- Helper function ----
+function features = extractCornerPatches(img, pts, halfSize)
+    numPts = size(pts,1);
+    features = zeros(numPts, (2*halfSize+1)^2);
+    for i = 1:numPts
+        r = round(pts(i,2));
+        c = round(pts(i,1));
+        r1 = max(1, r-halfSize); r2 = min(size(img,1), r+halfSize);
+        c1 = max(1, c-halfSize); c2 = min(size(img,2), c+halfSize);
+        patch = imcrop(img, [c1 r1 c2-c1 r2-r1]);
+        patch = imresize(patch, [2*halfSize+1, 2*halfSize+1]);
+        features(i,:) = double(patch(:))';
+    end
+end
