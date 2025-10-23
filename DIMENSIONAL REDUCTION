@@ -1,0 +1,16 @@
+%matplotlib inline
+import numpy as np, matplotlib.pyplot as plt
+from sklearn.datasets import fetch_olivetti_faces
+from sklearn.decomposition import PCA, DictionaryLearning
+
+X = fetch_olivetti_faces(shuffle=True, random_state=42).data
+pca = PCA(n_components=100, whiten=True, random_state=42); X_pca = pca.fit_transform(X)
+dict_learner = DictionaryLearning(n_components=100, transform_algorithm='omp', transform_n_nonzero_coefs=10, random_state=42)
+X_dict = dict_learner.fit_transform(X_pca)
+X_recon = pca.inverse_transform(np.dot(X_dict, dict_learner.components_))
+
+plt.figure(figsize=(10,4))
+for i in range(5):
+    plt.subplot(2,5,i+1); plt.imshow(X[i].reshape(64,64),cmap='gray'); plt.axis('off'); plt.title("Orig")
+    plt.subplot(2,5,i+6); plt.imshow(X_recon[i].reshape(64,64),cmap='gray'); plt.axis('off'); plt .title("Recon")
+plt.tight_layout(); plt.show()
