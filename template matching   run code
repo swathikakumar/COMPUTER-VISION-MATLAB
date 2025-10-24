@@ -1,0 +1,63 @@
+clear; clc; close all;
+img = imread("/MATLAB Drive/portrait-adorable-white-polar-bear-with-snow_23-2151478424.jpg");
+if size(img,3) == 3
+    img_gray = rgb2gray(img);
+else
+    img_gray = img;
+end
+template = imread("/MATLAB Drive/2i3TK603pRdrEiN7mnoSa6EurvY-mobile.jpg" );
+if size(template,3) == 3
+    template_gray = rgb2gray(template);
+else
+    template_gray = template;
+end
+[th, tw] = size(template_gray);
+methods = {'CCOEFF', 'CCOEFF_NORMED', 'CCORR', 'CCORR_NORMED', 'SQDIFF', 'SQDIFF_NORMED'};
+for i = 1:length(methods)
+    method = methods{i};
+    img_disp = img_gray;  
+    switch method
+        case 'CCOEFF'
+            img_mean = double(img_gray) - mean(img_gray(:));
+            temp_mean = double(template_gray) - mean(template_gray(:));
+            result = xcorr2(img_mean, temp_mean);
+        case 'CCOEFF_NORMED'
+            result = normxcorr2(template_gray, img_gray);
+        case 'CCORR'
+            result = xcorr2(double(img_gray), double(template_gray));
+        case 'CCORR_NORMED'
+            result = normxcorr2(template_gray, img_gray); 
+        case {'SQDIFF', 'SQDIFF_NORMED'}
+            [ih, iw] = size(img_gray);
+            result = inf(ih - th + 1, iw - tw + 1);
+            for x = 1:ih - th + 1
+                for y = 1:iw - tw + 1
+                    patch = double(img_gray(x:x+th-1, y:y+tw-1));
+                    diff = patch - double(template_gray);
+                    result(x, y) = sum(diff(:).^2);
+                end
+            end
+    end
+    switch method
+        case {'SQDIFF', 'SQDIFF_NORMED'}
+            [min_val, idx] = min(result(:));
+            [y_peak, x_peak] = ind2sub(size(result), idx);
+        otherwise
+            [max_val, idx] = max(result(:));
+            [y_peak, x_peak] = ind2sub(size(result), idx);
+            if strcmp(method, 'CCOEFF_NORMED') || strcmp(method, 'CCORR_NORMED')
+                x_peak = x_peak - tw + 1;
+                y_peak = y_peak - th + 1;
+            end
+    end
+   
+    figure;
+    subplot(1,2,1);
+    imagesc(result); colormap gray; axis image;
+    title(['Matching Result - ', method]);
+    colorbar;
+    subplot(1,2,2);
+    imshow(img_gray); hold on;
+    rectangle('Position', [x_peak, y_peak, tw, th], 'EdgeColor', 'r', 'LineWidth', 2);
+    title(['Detected Point - ', method]);
+end
